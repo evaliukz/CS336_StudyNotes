@@ -1,4 +1,4 @@
-# 1. 回顾 standard transformer
+# 回顾 standard transformer
 你实现的那个 Transformer，只是“教材版”, 真正 LLM 早就改了很多东西
 
 
