@@ -98,7 +98,7 @@ Pre-norm：
 
 当然更稳。
 
-🧠 第二大块：LayerNorm vs RMSNorm
+# 🧠 第二大块：LayerNorm vs RMSNorm
 
 现代模型很多已经不用 LayerNorm 了。
 
@@ -162,7 +162,7 @@ DeepSeek
 
 → 用 RMSNorm
 
-第三大块：Activation evolution
+# 第三大块：Activation evolution
 
 这一段 slides 在讲：
 
@@ -220,7 +220,7 @@ FFN = SwiGLU
 
 不是 GELU。
 
-第四大块：FFN width
+# 第四大块：FFN width
 
 这一块 slides 非常关键。
 
