@@ -501,7 +501,9 @@ memory bandwidth
 
 “这个结构训得出来 + 训得快”
 
-🧠 第八大块：Hyperparameter
+# 🧠 第八大块：Hyperparameter 超参数
+
+很多model的参数都是照抄别的model的，但T5很大胆。
 
 最后 slides 会强调：
 
@@ -521,5 +523,148 @@ scaling law 结论：
 
 模型效果 ≈ 参数量 + 数据量 + compute
 
-architecture 只是 baseline。
+## Aspect ratio：模型不是“参数越多越好”，而是“深度 vs 宽度比例（aspect ratio）非常关键”
 
+#### 什么是 aspect ratio？
+
+在 Transformer 里，两个最重要的结构超参数：
+
+Depth（层数 L）
+
+Width（隐藏维度 d_model）
+
+模型参数大约是：Params≈L×dmodel^2
+​
+所以当你固定参数量时：
+
+你可以选：
+
+深而窄（很多层，小宽度）
+
+浅而宽（少层，大宽度）
+
+Aspect ratio 就是：D/W
+
+#### 宽度 = 表达能力（每一层多聪明）
+
+宽度大：
+
+每个 token 表示空间更大
+
+FFN 更强
+
+每层“脑容量”更大
+
+在 Transformer 里，每个 token 是：一个向量
+
+"cat" → [0.12, -0.3, … , 0.88]
+
+这个向量长度叫：d_model
+
+为什么叫“宽”？
+
+因为：向量维度越大，就像“每层的空间越宽”。4096 维 vs 768 维：4096 可以表达更复杂特征, 类似“脑容量更大”
+
+width 在 Transformer 里具体影响什么？
+
+非常重要。
+
+1️⃣ embedding size
+
+token 表示能力。
+
+2️⃣ attention 维度
+
+Q/K/V 全是 width 维。
+
+3️⃣ FFN 规模
+
+FFN 通常：d_ff=4×d_model, width 越大，FFN 越爆炸。
+	​
+**这就是 Transformer 的 width**
+
+#### 深度 = 推理步骤（能做多少次变换）
+
+Transformer 是一层一层叠的 block：
+```
+embedding
+↓
+Transformer block 1
+↓
+Transformer block 2
+↓
+Transformer block 3
+...
+↓
+output
+```
+这些 block 的数量：L 就是 depth
+每个 block 包含：
+```
+attention
++
+ffn
++
+norm
+```
+每一层：attention 重新组合信息、信息交流, ffn 重新加工信息
+
+层数多：
+
+信息可以逐层抽象
+
+更复杂的组合推理
+
+表达层次更多
+
+大白话：
+
+深模型 = 思考步骤多, 信息经过更多次变换。
+
+depth 在 Transformer 里影响什么？
+
+1️⃣ reasoning chain
+
+层数越多：
+
+抽象能力越强
+
+复杂组合能力越强
+
+2️⃣ receptive field processing
+
+多层 attention 可以逐层传播信息。
+
+### 三、那是不是越深越好？
+
+不是。
+
+这里是关键点。
+
+情况 A：太宽太浅（胖但不高）
+
+问题：
+
+每层很强
+
+但推理步数不够
+
+复杂组合能力弱
+
+大白话：
+
+脑容量大，但只思考两步。
+
+情况 B：太深太窄（高但很瘦）
+
+问题：
+
+每层表达能力不足
+
+信息压缩严重
+
+梯度更难传
+
+大白话：
+
+思考很多步，但每步都很笨。
