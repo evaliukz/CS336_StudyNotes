@@ -262,6 +262,8 @@ GPU 访问 DRAM / HBM (global memory) 时，查一个数值，会返回一整段
 
 <img width="2015" height="1157" alt="image" src="https://github.com/user-attachments/assets/4c23c3f4-9de3-497a-b88a-0a6f916cb867" />
 
+还是利用了矩阵乘法的性质，将矩阵分割成子矩阵，再相乘计算。
+
 这是这章最重要的“大招”
 
 Tiling 的思想是：
