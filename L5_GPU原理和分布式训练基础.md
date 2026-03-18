@@ -230,10 +230,12 @@ GPU 世界里，记住东西不一定比重新想一遍便宜。  ￼
 
 ### 技巧 4：内存合并访问（memory coalescing）
 
+<img width="2132" height="1143" alt="image" src="https://github.com/user-attachments/assets/04c81011-ca76-479d-b47d-d8e791631cc4" />
+
 它是什么
 
-GPU 访问 DRAM / HBM 时，喜欢一整段连续地拿。
-如果一个 warp 里的线程访问的是连续地址，那这些访问就更容易合并成少量大块请求。  ￼
+GPU 访问 DRAM / HBM (global memory) 时，查一个数值，会返回一整段连续的数值。
+如果一个 warp 里的线程访问的是连续地址，那这些访问就更容易合并成少量大块请求。还是为了矩阵乘法。
 
 为什么重要
 
