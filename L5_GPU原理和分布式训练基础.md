@@ -350,6 +350,8 @@ Tiling = 先囤一小车货到车间，再在车间里反复加工。  ￼
 
 同样的数学，换了一种更尊重 GPU 内存层级的执行方式。  ￼
 
+<img width="2048" height="1137" alt="image" src="https://github.com/user-attachments/assets/b71edf70-c597-452e-ac72-f9f1c30c5ae2" />
+
 ⸻
 
 ### 3）难点：softmax 不是要看完整一行吗
