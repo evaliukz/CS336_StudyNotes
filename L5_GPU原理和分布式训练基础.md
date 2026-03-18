@@ -110,6 +110,9 @@ SP / CUDA core
 
 # 五、为什么 GPU 会慢：Roofline 这个脑图一定要建立起来
 
+<img width="1993" height="1201" alt="image" src="https://github.com/user-attachments/assets/6651e90e-88f8-4365-948c-422819a8f2e4" />
+
+
 这一章会用 Roofline model 去解释性能瓶颈。
 你不用记公式，先记结论：
 
