@@ -87,7 +87,7 @@ GPU 不是不会算，它通常是 搬东西太累。
 
 讲义里明说：如果你想写高性能代码，最该记住的一件事就是 benchmark 和 profile。 课程里甚至专门用一个 MLP 示例，做 benchmark 和 profile，说明“猜瓶颈”常常不靠谱。 ￼
 
-### 1）benchmark 是看“总共用了多久”
+### 1）benchmark 是看“花了多少时间"
 
 讲义把 benchmark 说得很直接：
 它测的是 wall-clock time，也就是“这件事从头到尾花了多久”；它适合做两件事：比较不同实现谁更快，以及看性能如何随规模变化。 ￼
@@ -107,9 +107,7 @@ benchmark 像你看外卖总共多久送到。
 GPU 很像你把任务甩给一个厨房，厨房说“收到”，但其实菜还没炒完。
 如果你在“收到”那一刻就停表，你测到的是“下单成功时间”，不是“上菜时间”。
 
-所以：
-
-不 synchronize()，很多 GPU benchmark 都是在自欺欺人。  ￼
+torch.cuda.synchronize()： 不 synchronize()，很多 GPU benchmark 都是在自欺欺人，因为CPU可能同时还干别的事情。这个方程就是表示此刻，让CPU和GPU在现在这个代码上的运行处于同一个状态。这个代码是让CUDA等别的thread结束，从现在开始计算时间。
 
 ### 3）profile 是看“时间花在哪”
 
