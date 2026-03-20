@@ -127,6 +127,86 @@ profile 会告诉你：
 
 这就是为什么 profile 比 benchmark 更接近“理解系统内部”。 ￼
 
+#### NSYS（Nsight Systems）
+给你的 GPU 程序做“时间线录像”，告诉你每一毫秒 GPU 和 CPU 在干嘛
+
+<img width="2052" height="1340" alt="image" src="https://github.com/user-attachments/assets/b2c4b200-f858-43a7-88a6-df1548845d70" />
+
+常见几条“轨道”（非常重要）
+
+1️⃣ CPU 线程
+
+👉 Python / dataloader / framework 在干嘛
+
+⸻
+
+2️⃣ CUDA API
+
+👉 CPU 在调用 GPU（launch kernel）
+
+⸻
+
+3️⃣ GPU kernels
+
+👉 GPU 真正在算的东西（最重要）
+
+⸻
+
+4️⃣ Memcpy（数据传输）
+
+👉 CPU ↔ GPU 数据拷贝
+
+👉 1️⃣ GPU 有没有在“闲着”
+
+如果你看到
+
+[GPU] ████     ███     ██
+
+👉 中间有空白
+
+👉 ❗说明 GPU 在等（浪费）
+
+⸻
+
+👉 2️⃣ CPU 是不是瓶颈
+
+如果：
+
+CPU:  █████████████
+
+GPU:     █   █   █
+
+👉 GPU 一直在等 CPU
+
+👉 ❗问题在 CPU（比如 dataloader 太慢）
+
+⸻
+
+👉 3️⃣ 数据拷贝是不是卡住
+
+如果看到：
+   •   很多 memcpy
+   •   占用时间很长
+
+👉 ❗说明：
+
+数据搬运太慢（IO瓶颈）
+
+⸻
+
+👉 4️⃣ kernel 是否碎片化（高级但重要）
+
+如果 GPU 上是：
+
+█ █ █ █ █ █ █
+
+👉 很多小 kernel
+
+👉 ❗说明：
+
+launch overhead 很大（效率低）
+
+
 ### 4）为什么 tensor shape 会影响底层 kernel
 
 讲义里专门比较了 matmul(dim=2048) 和 matmul(dim=128)，并指出：不同 tensor 维度会调用不同 CUDA kernels；kernel 名里甚至会直接透露实现信息，比如 CUTLASS、tile size 等。 ￼
