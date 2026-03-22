@@ -1,4 +1,4 @@
-一、这一章到底在讲什么
+# 一、这一章到底在讲什么
 
 这一章想解决两个特别现实的问题：
 
@@ -15,7 +15,7 @@
 
 第 7 章就是“大模型训练怎么组团干活”。
 
-二、这一章最核心的总思路
+# 二、这一章最核心的总思路
 
 你先记这一句，后面所有内容都会围着它转：
 
@@ -33,7 +33,7 @@
 
 最后问：我的 GPU 之间连接快不快？是在一台机器里，还是跨机器？
 
-三、先打底：为什么多机训练会突然变复杂
+# 三、先打底：为什么多机训练会突然变复杂
 
 单 GPU 的世界里，你主要操心：
 
@@ -67,7 +67,7 @@ GPU 和 GPU 要互相说话
 同屋的人喊一声就能听见。隔壁楼的人要打电话。
 所以你不能把所有通信都当成一样便宜。
 
-四、先学会“几种集体通信”，不然后面会晕
+# 四、先学会“几种集体通信”，不然后面会晕
 
 这一讲先花了一块内容讲 collective communication，也就是“集体通信操作”。最重要的是：
 
@@ -81,7 +81,7 @@ broadcast
 
 reduce
 
-1）all-reduce 是什么
+### 1）all-reduce 是什么
 
 每张 GPU 都有一份东西，比如梯度。
 现在要把它们加起来，然后让每张 GPU 都拿到总和。
@@ -91,7 +91,7 @@ reduce
 4 个同学各自算了一部分分数，最后要把总分算出来，而且每个人手里都要有一份总分。
 这就是 all-reduce。
 
-2）all-gather 是什么
+### 2）all-gather 是什么
 
 每张 GPU 只拿着自己那一小块数据。
 现在要把这些小块拼起来，让所有 GPU 都看到完整数据。
@@ -100,7 +100,7 @@ reduce
 
 每个人手里只有拼图的一小块，现在要互相交换，最后每个人都看到整幅图。
 
-3）reduce-scatter 是什么
+### 3）reduce-scatter 是什么
 
 先把大家的数据做 reduce，比如求和；
 但不是每个人都拿完整结果，而是每个人只拿结果中的一部分。
@@ -110,7 +110,7 @@ reduce
 大家一起做总账，但做完后不是每人拿整本账本，
 而是甲拿第一页，乙拿第二页，丙拿第三页。
 
-4）这一讲最关键的等价关系
+### 4）这一讲最关键的等价关系
 
 讲课里特别强调了一件事：
 
@@ -129,7 +129,7 @@ all-reduce ≈ reduce-scatter + all-gather
 现在变成“每人只负责自己那几页，更新完再拼起来”。
 这就省显存了。
 
-五、第一大类并行：Data Parallel（数据并行）
+# 五、第一大类并行：Data Parallel（数据并行）
 
 这是最自然、最常见、也是大家最早接触的并行方式。讲课里把它定义得很直接：
 
@@ -145,7 +145,7 @@ all-reduce ≈ reduce-scatter + all-gather
 批改完之后，4 个人开会，把意见汇总，
 然后一起修改教材。
 
-1）它最大的优点：算力扩展很舒服
+### 1）它最大的优点：算力扩展很舒服
 
 如果 batch 足够大，每个 GPU 都能拿到一块不小的数据，
 每张卡都能比较忙，算力利用率不错。
@@ -154,7 +154,7 @@ all-reduce ≈ reduce-scatter + all-gather
 
 活够多的话，多招几个人就真能更快。
 
-2）它最大的缺点：显存特别浪费
+### 2）它最大的缺点：显存特别浪费
 
 因为每张 GPU 都要放：
 
@@ -185,7 +185,7 @@ all-reduce ≈ reduce-scatter + all-gather
 
 最后包最重的不是书本身，而是“管理这本书的那些记录”。
 
-六、为什么 Adam 这么吃显存
+# 六、为什么 Adam 这么吃显存
 
 这一段你一定要建立直觉，因为后面 ZeRO 就是在治这个病。
 
@@ -215,7 +215,7 @@ Adam 像一个“记性很好”的老师。
 所以它训练效果常常不错，
 但代价就是：很占内存。
 
-七、ZeRO：数据并行的“聪明升级版”
+# 七、ZeRO：数据并行的“聪明升级版”
 
 这一讲最重要的一块内容之一，就是 ZeRO。
 ZeRO = Zero Redundancy Optimizer。
@@ -223,7 +223,7 @@ ZeRO = Zero Redundancy Optimizer。
 
 既然复制太浪费，那就别什么都复制到每张 GPU 上。
 
-八、ZeRO Stage 1：先把优化器状态拆开
+# 八、ZeRO Stage 1：先把优化器状态拆开
 它做了什么
 
 每张 GPU 还是有完整参数、完整梯度。
@@ -262,7 +262,7 @@ reduce-scatter + all-gather 的带宽代价，和原来 all-reduce 差不多。
 
 每个人脑子里不用都记全部账了。
 
-九、ZeRO Stage 2：再把梯度也拆开
+# 九、ZeRO Stage 2：再把梯度也拆开
 它做了什么
 
 在 Stage 1 基础上，进一步把梯度也分片。
@@ -287,7 +287,7 @@ reduce-scatter + all-gather 的带宽代价，和原来 all-reduce 差不多。
 
 边反向、边传、边扔。
 
-十、ZeRO Stage 3 / FSDP：连参数也拆开
+# 十、ZeRO Stage 3 / FSDP：连参数也拆开
 
 这一阶段最猛。
 课程里直接说：
@@ -340,7 +340,7 @@ FSDP 本质上就是 ZeRO Stage 3。
 但如果你能做到“上一件还在用，下一件已经在路上”，
 那就没你想得那么慢。
 
-十一、为什么 FSDP 很强，但也不是白来的
+# 十一、为什么 FSDP 很强，但也不是白来的
 
 FSDP 的优点很大：
 
@@ -362,7 +362,7 @@ FSDP 的优点很大：
 
 FSDP 是显存省钱高手，但通信账单会更高。
 
-十二、这一讲里一个特别重要的思想：Batch size 也是“资源”
+# 十二、这一讲里一个特别重要的思想：Batch size 也是“资源”
 
 这句话是第 7 章很值钱的地方。
 
@@ -381,7 +381,7 @@ FSDP 是显存省钱高手，但通信账单会更高。
 所以 batch size 不是想多大就多大。
 它像预算一样，得分配给不同并行方式使用。
 
-十三、第二大类并行：Model Parallel（模型并行）
+# 十三、第二大类并行：Model Parallel（模型并行）
 
 当模型大到复制不起时，就得考虑：
 
@@ -394,7 +394,7 @@ pipeline parallel
 
 tensor parallel
 
-十四、Pipeline Parallel（流水线并行）
+# 十四、Pipeline Parallel（流水线并行）
 1）最直观的想法
 
 神经网络不是一层一层吗？
@@ -419,7 +419,7 @@ GPU2 负责后几层
 
 第三站装盘
 
-2）为什么朴素流水线很烂
+### 2）为什么朴素流水线很烂
 
 如果你一次只送一个样本进流水线，
 就会出现很大的 bubble：
@@ -434,7 +434,7 @@ GPU2 负责后几层
 等第一站干完，第二站才开始；
 这不叫高效分工，这叫排队发呆。
 
-3）怎么改进：microbatch
+### 3）怎么改进：microbatch
 
 更聪明的做法是把一个大 batch 再拆成很多 microbatch。
 第一个 microbatch 从 GPU0 传给 GPU1 后，
@@ -454,20 +454,22 @@ overhead / useful compute ≈ (stages - 1) / microbatches
 流水线要高效，不是因为站点多，
 而是因为前一个盘子刚离开第一站，第二个盘子立刻补上。
 
-4）为什么大家还是会用 pipeline parallel
+### 4）为什么大家还是会用 pipeline parallel
 
 虽然它麻烦，还会有 bubble，
 但它有两个现实优点：
 
 第一，能把模型和激活都沿深度方向分散到多张卡上，省显存。
+
 第二，它传的是激活，很多时候是点对点通信，对慢网络比较友好。
+
 课程里明确说，pipeline parallel 常常用在更慢的跨节点链路上。
 
 大白话：
 
 pipeline parallel 虽然笨一点，但特别适合“远距离接力”。
 
-5）为什么它让人头疼
+### 5）为什么它让人头疼
 
 课程里很直白地说：
 pipeline parallel 在工程实现上会非常复杂。
@@ -480,7 +482,7 @@ pipeline parallel 在工程实现上会非常复杂。
 只要时序、队列、反向调度哪里错一点，
 整条线都乱。
 
-6）更高级：zero-bubble / dual-pipe
+### 6）更高级：zero-bubble / dual-pipe
 
 课程里还提到一种很聪明的做法：
 把 backward 里“必须立刻往前传的部分”和“算参数梯度但不急着传的部分”拆开。
@@ -493,11 +495,11 @@ pipeline parallel 在工程实现上会非常复杂。
 那就把“晚一点做也行”的活塞进空档里，
 把闲着的时间利用起来。
 
-十五、Tensor Parallel（张量并行）
+# 十五、Tensor Parallel（张量并行）
 
 这是另一条非常重要的路，而且在大模型里特别常见。
 
-1）核心思想
+### 1）核心思想
 
 大模型里很多计算都是矩阵乘法。
 那与其按“层”切，不如按“矩阵的宽度”切。
@@ -509,7 +511,7 @@ pipeline parallel 在工程实现上会非常复杂。
 而是把一大块肉切成几份，
 几个人同时剁，最后再拼起来。
 
-2）它在前向里怎么干
+### 2）它在前向里怎么干
 
 课程里讲得很具体：
 比如 Y = X @ A，把 A 切成 A1, A2，
@@ -523,7 +525,7 @@ pipeline parallel 在工程实现上会非常复杂。
 但参数每人只管一块。
 最后再把局部答案合成总答案。
 
-3）它的好处
+### 3）它的好处
 
 不需要靠更大的 batch 来填 bubble
 
@@ -536,7 +538,7 @@ pipeline parallel 在工程实现上会非常复杂。
 tensor parallel 比较像“多人同时抬同一张桌子”，
 而不是“桌子从一个人传到另一个人”。
 
-4）它的坏处：特别吃高速互连
+### 4）它的坏处：特别吃高速互连
 
 课程里非常强调：
 tensor parallel 的通信频率高，而且常常每层都要同步。
@@ -552,7 +554,7 @@ tensor parallel 像多人一起托举一张很大的木板，
 你们必须靠得很近、配合很快。
 如果人都分散在不同楼层，那就别这么干了。
 
-5）为什么大家常说 TP 到 8 张卡很常见
+### 5）为什么大家常说 TP 到 8 张卡很常见
 
 课程里给出的经验是：
 tensor parallel 在单机内到 8 张卡常常比较合适；
@@ -562,7 +564,7 @@ tensor parallel 在单机内到 8 张卡常常比较合适；
 
 机内做 tensor parallel，跨机再叠别的并行。
 
-十六、Sequence Parallel / Activation Sharding（序列并行 / 激活切分）
+# 十六、Sequence Parallel / Activation Sharding（序列并行 / 激活切分）
 
 这一段很关键，因为很多人前面学完会以为：
 
@@ -571,7 +573,7 @@ tensor parallel 在单机内到 8 张卡常常比较合适；
 课程说：还没。
 activation memory 还是会继续长。
 
-1）为什么 activation 这么烦
+### 1）为什么 activation 这么烦
 
 训练时前向要存很多激活，
 反向时再逐步释放。
@@ -585,7 +587,7 @@ activation memory 还是会继续长。
 最挤的时候不是最开始，也不是最后，
 而是中间那段“旧东西没清完，新东西又进来”的时刻。
 
-2）为什么 tensor parallel 也没完全搞定 activation
+### 2）为什么 tensor parallel 也没完全搞定 activation
 
 课程里说得很清楚：
 大矩阵乘法相关的 activation 好切，
@@ -599,7 +601,7 @@ activation memory 还是会继续长。
 但还有很多小零碎没拆，
 最后这些零碎也会把房间塞满。
 
-3）sequence parallel 的核心办法
+### 3）sequence parallel 的核心办法
 
 既然 layer norm、dropout 这类操作在不同 token / sequence position 之间常常互不依赖，
 那就沿着序列维度把它们切开。
@@ -611,7 +613,7 @@ activation memory 还是会继续长。
 而是按“句子的位置”切。
 甲管前 256 个 token，乙管中间 256 个，丙管后面 256 个。
 
-4）为什么还要同步
+### 4）为什么还要同步
 
 切完之后，有些后续层还是需要更完整的视图，
 所以前向里会有 all-gather / reduce-scatter，
@@ -622,7 +624,7 @@ activation memory 还是会继续长。
 大家先各做各的一小段，
 但到了要拼成完整句子的时候，还是得对一下答案。
 
-5）它和 FlashAttention / recomputation 的关系
+### 5）它和 FlashAttention / recomputation 的关系
 
 课程里把 activation memory 讲成两部分：
 
@@ -645,17 +647,17 @@ pointwise 部分靠 sequence parallel
 
 attention 最贵那块靠 FlashAttention / 重计算
 
-十七、这一讲最后顺带提到的两种并行
+# 十七、这一讲最后顺带提到的两种并行
 
 课程后面还顺带提了两类，没深讲，但你要知道名字：
 
-1）Context Parallel / Ring Attention
+### 1）Context Parallel / Ring Attention
 
 把长上下文 attention 的计算再沿序列 / KV 流动方式拆开。
 每台机器负责一部分 query，keys/values 以 ring 方式传递。
 这和你前面学的 FlashAttention 分块思路是连着的。
 
-2）Expert Parallel
+### 2）Expert Parallel
 
 MoE 里把不同 expert 分散到不同机器。
 概念上有点像 tensor parallel，但多了 routing 不均衡的问题，因为不同 expert 负载可能不一样。
@@ -666,12 +668,12 @@ context parallel：把“长句子的注意力”也拆着算
 
 expert parallel：把“不同专家老师”分到不同办公室
 
-十八、这一章最值钱的实战结论：怎么组合这些并行
+# 十八、这一章最值钱的实战结论：怎么组合这些并行
 
 课程最后给了一个非常实用的 rule of thumb。
 我把它翻译成大白话给你。
 
-第一步：先让模型能放得下
+### 第一步：先让模型能放得下
 
 如果模型根本放不下，别谈别的。
 优先用能省显存的手段，让模型先 fit in memory：
@@ -682,13 +684,13 @@ tensor parallel 先用到单机内合理上限
 
 activation 太大再上 sequence parallel / recomputation
 
-第二步：放得下之后，再追求更多总算力
+### 第二步：放得下之后，再追求更多总算力
 
 当模型已经能跑起来了，剩下 GPU 想继续加速，
 这时通常继续往外扩的是 data parallel。
 因为 data parallel 对慢网络更友好，也更通用。
 
-第三步：batch size 不够时，用 gradient accumulation
+### 第三步：batch size 不够时，用 gradient accumulation
 
 如果通信太频繁、全局 batch 又受限，
 就用 gradient accumulation 等办法，
@@ -699,7 +701,7 @@ activation 太大再上 sequence parallel / recomputation
 先解决“能不能装下”，再解决“能不能更快”。
 别反过来。
 
-十九、你可以把这章记成一句超级口语化总结
+# 十九、你可以把这章记成一句超级口语化总结
 
 数据并行是“每人拿一整本教材，批不同作业”；
 ZeRO/FSDP 是“教材和账本别全员复制，谁负责哪页谁拿哪页”；
@@ -707,7 +709,7 @@ pipeline parallel 是“按流水线分层传激活”；
 tensor parallel 是“同一层的大矩阵大家一起抬”；
 sequence parallel 是“连那些零碎的激活也按 token 切开”。
 
-二十、学习笔记版
+# 二十、学习笔记版
 CS336 Lecture 7: Parallelism 1 学习笔记
 1. 本章目标
 
