@@ -647,6 +647,9 @@ pointwise 部分靠 sequence parallel
 
 attention 最贵那块靠 FlashAttention / 重计算
 
+回顾：什么是flash attention？Flash Attention improves attention efficiency by reducing memory IO. 不存整个超级大attention matrix。 It 分块计算 computes attention in a tiled and （融合步骤把QKᵀ，softmax，×V合在一起一次做完）
+ fused manner, avoiding materializing the full attention matrix and keeping computation within fast GPU memory.
+
 # 十七、这一讲最后顺带提到的两种并行
 
 课程后面还顺带提了两类，没深讲，但你要知道名字：
