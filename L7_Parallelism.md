@@ -254,6 +254,11 @@ reduce-scatter + all-gather 的带宽代价，和原来 all-reduce 差不多。
 
 在 Stage 1 基础上，进一步把梯度也分片。
 
+<img width="2055" height="1154" alt="image" src="https://github.com/user-attachments/assets/67472482-75e6-425b-8af2-ad2c9b2c9a0a" />
+
+<img width="2098" height="1211" alt="image" src="https://github.com/user-attachments/assets/6f1270ac-4979-4a8a-b944-3d87299ef0aa" />
+
+
 新的难点是什么
 
 课程里说得很清楚：
