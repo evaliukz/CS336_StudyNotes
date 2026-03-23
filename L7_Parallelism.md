@@ -67,6 +67,11 @@ GPU 和 GPU 要互相说话
 同屋的人喊一声就能听见。隔壁楼的人要打电话。
 所以你不能把所有通信都当成一样便宜。
 
+GPU vs. TPU
+
+<img width="2071" height="1239" alt="image" src="https://github.com/user-attachments/assets/869f81c8-8483-44be-b787-081bf86ead5e" />
+
+
 # 四、先学会“几种集体通信”，不然后面会晕
 
 这一讲先花了一块内容讲 collective communication，也就是“集体通信操作”。最重要的是：
