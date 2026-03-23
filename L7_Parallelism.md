@@ -117,6 +117,9 @@ reduce
 all-reduce ≈ reduce-scatter + all-gather
 至少在带宽受限的角度看，它们是等价的。
 
+<img width="2000" height="1204" alt="image" src="https://github.com/user-attachments/assets/52027bde-b2fb-4218-9917-159ae52c258a" />
+
+
 这个等价关系非常重要，因为后面 ZeRO / FSDP 就是靠这个思路玩的：
 
 以前你是先 all-reduce 梯度，让每个人都拿完整梯度；
