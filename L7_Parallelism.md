@@ -139,9 +139,9 @@ all-reduce ≈ reduce-scatter + all-gather
 
 # 五、从现在开始，computing unit是一个data center： memory scaling 和 compute scaling都可以通过并行策略
 
-## 第一大类并行：Data Parallel（数据并行）- Navive 或者 Zero
+# 第一大类并行：Data Parallel（数据并行）- Navive 或者 Zero
 
-### 第一种Data Parallel：Naive Data Parallel 
+## 第一种Data Parallel：Naive Data Parallel 
 
 就是计算一个东西，例如梯度，把这个计算分配到不同的GPU上。
 
@@ -195,7 +195,7 @@ Adam 像一个“记性很好”的老师。
 结果每个人还背着：书的正文，批注本，历史批注本，统计表，备份本，最后包最重的不是书本身，而是“管理这本书的那些记录”。
 
 
-### 第二种Data Parallel ZeRO：数据并行的“聪明升级版”
+## 第二种Data Parallel ZeRO：数据并行的“聪明升级版”
 
 这一讲最重要的一块内容之一，就是 ZeRO。
 ZeRO = Zero Redundancy Optimizer。
@@ -203,8 +203,15 @@ ZeRO = Zero Redundancy Optimizer。
 
 既然复制太浪费，那就别什么都复制到每张 GPU 上。
 
+<img width="2388" height="1226" alt="image" src="https://github.com/user-attachments/assets/6384d1e8-8a8c-4510-8d76-bbf18b727348" />
+
+
 #### ZeRO Stage 1：先把优化器状态拆开
 它做了什么
+<img width="2237" height="1168" alt="image" src="https://github.com/user-attachments/assets/feb71bae-dec1-46d5-bc3a-11b9d45b76c2" />
+
+<img width="2191" height="1203" alt="image" src="https://github.com/user-attachments/assets/049ba02f-7573-4ce4-92ec-f547d92b1568" />
+
 
 每张 GPU 还是有完整参数、完整梯度。
 但是优化器状态不再每张卡都复制一份，
@@ -320,7 +327,7 @@ FSDP 本质上就是 ZeRO Stage 3。
 但如果你能做到“上一件还在用，下一件已经在路上”，
 那就没你想得那么慢。
 
-# 十一、为什么 FSDP 很强，但也不是白来的
+#### 为什么 FSDP 很强，但也不是白来的
 
 FSDP 的优点很大：
 
@@ -362,12 +369,12 @@ FSDP 是显存省钱高手，但通信账单会更高。
 它像预算一样，得分配给不同并行方式使用。
 
 
-## 第三大类并行：Activation Parallel（激活并行）- Sequence 并行
 
 
 
 
-## 第二大类并行：Model Parallel（模型并行）- Pipeline 或者 Tensor 并行
+
+# 第二大类并行：Model Parallel（模型并行）- Pipeline 或者 Tensor 并行
 
 当模型大到复制不起时，就得考虑：
 
@@ -549,6 +556,9 @@ tensor parallel 在单机内到 8 张卡常常比较合适；
 所以行业里常见模式就是：
 
 机内做 tensor parallel，跨机再叠别的并行。
+
+
+# 第三大类并行：Activation Parallel（激活并行）- Sequence 并行
 
 # 十六、Sequence Parallel / Activation Sharding（序列并行 / 激活切分）
 
