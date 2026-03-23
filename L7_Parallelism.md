@@ -139,6 +139,25 @@ all-reduce ≈ reduce-scatter + all-gather
 
 # 五、从现在开始，computing unit是一个data center： memory scaling 和 compute scaling都可以通过并行策略
 
+复习知识：
+
+前向传播 = 模型在“算答案” 前向传播（Forward Pass） 就是你最直观理解的那一步：输入 → 模型 → 输出
+举例（LLM）输入一句话：“I love” 模型做：  •   embedding  •   attention  •   FFN  👉 输出：“you” 的概率 👉 这一整个过程：✅ 就是前向传播
+
+反向传播 = 模型在“改参数（学习）” 
+
+反向传播（Backward Pass）是“学习”的核心：
+
+模型根据错误，调整参数
+
+1️⃣ 模型输出结果
+2️⃣ 和正确答案比较（loss）
+3️⃣ 算“哪里错了”
+4️⃣ 把错误往回传（backward）
+
+👉 最终得到：❗每个参数应该怎么改（gradient）
+
+
 # 第一大类并行：Data Parallel（数据并行）- Navive 或者 Zero
 
 ## 第一种Data Parallel：Naive Data Parallel 
@@ -193,6 +212,97 @@ Adam 像一个“记性很好”的老师。
 
 你本来只想带一本书出门，
 结果每个人还背着：书的正文，批注本，历史批注本，统计表，备份本，最后包最重的不是书本身，而是“管理这本书的那些记录”。
+
+#### 为什么Gradient能够让data分片计算？
+gradient（梯度）= 告诉模型“每个参数该往哪个方向改，改多少”
+
+先用最简单的例子理解 gradient：假设模型只有一个参数：w
+
+模型预测：预测 = w × x
+
+目标
+
+真实答案是：10
+模型算出来：8
+
+👉 错了 2，那怎么办？ 你会问：❓“w 应该变大还是变小？” gradient 就是在回答：“往哪个方向改，能让误差变小？”
+
+
+
+🔥 gradient本质（核心理解）：gradient = “如果我动一下这个参数，loss会怎么变”
+
+👉 数学上是：“斜率”（slope）
+
+
+🚀 三、现在进入重点：Data Parallel
+
+🎬 场景：你有2个GPU
+
+样本1: x=1 → y=2  
+样本2: x=2 → y=4  
+样本3: x=3 → y=6  
+样本4: x=4 → y=8  
+
+GPU1计算样本1,2
+GPU2计算样本3,4
+
+❗问题来了（关键）
+
+👉 GPU1算的 gradient₁：
+
+只基于一半数据
+
+👉 GPU2也是
+
+👉 ❗那哪个是“真正正确的梯度”？
+
+⸻
+
+🔥 答案：要合并！（核心）
+
+👉 正确的 gradient 应该是：gradient = (gradient₁ + gradient₂) / 2
+
+👉 这一步就是：
+
+all-reduce（通信）
+
+⸻
+
+🎯 六、为什么这样是“对的”？（最重要）
+
+👉 gradient 是对 loss 求导：
+
+👉 数学上有个性质：
+
+导数是可以拆分和平均的
+gradient = 平均(每个样本的gradient)
+
+👉 而：
+   •   GPU1算的是样本1,2
+   •   GPU2算的是样本3,4
+
+⸻
+
+👉 合并之后：
+
+❗正好等于“全数据算出来的gradient”
+
+👉 像开会决策：
+   •   GPU1：建议 w 增大 2
+   •   GPU2：建议 w 增大 4
+   最终决定：平均 = 增大 3
+
+   、关键前提（非常重要）
+
+👉 Data Parallel 成立的前提是：
+
+❗每个GPU用的是同一个模型参数
+
+⸻
+
+👉 否则：
+   •   gradient就不能直接平均
+
 
 
 ## 第二种Data Parallel ZeRO：数据并行的“聪明升级版”
