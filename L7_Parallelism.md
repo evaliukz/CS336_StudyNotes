@@ -372,14 +372,9 @@ reduce-scatter + all-gather 的带宽代价，和原来 all-reduce 差不多。
 
 边反向、边传、边扔。
 
-#### ZeRO Stage 3 / FSDP：连参数也拆开
+#### ZeRO Stage 3 也即 FSDP：连参数也拆开
 
-这一阶段最猛。
-课程里直接说：
-
-FSDP 本质上就是 ZeRO Stage 3。
-
-它做了什么
+这一阶段最猛。课程里直接说：FSDP 本质上就是 ZeRO Stage 3。
 
 现在不只是优化器状态和梯度分片，
 连参数本身也分片。
@@ -387,23 +382,150 @@ FSDP 本质上就是 ZeRO Stage 3。
 
 <img width="1081" height="602" alt="image" src="https://github.com/user-attachments/assets/bfbfc772-b3d7-44ae-b63f-ca4ac6638cba" />
 
-那前向怎么算
+<img width="1058" height="609" alt="image" src="https://github.com/user-attachments/assets/3c6570b3-cf45-4f77-8d56-4c617383c2b6" />
 
-要用到某一层时，先 all-gather 把这一层参数临时凑齐；
-算完这一层前向，就把这层参数释放掉；
-下一层再临时 gather。
+##### ZeRO-3 的 forward 过程：
 
-反向怎么算
+按层来看是：
 
-反向时也是类似思路：
+all-gather 这一层的参数分片
 
-需要哪层参数，就 gather
+每张 GPU 用完整的这一层参数，在自己的本地数据上做前向
 
-算出这层梯度
+前向算完后，把这层完整参数释放掉
 
-再 reduce-scatter
+我给你翻成大白话。
 
-再释放不需要的参数和梯度
+👉 第 1 步：all-gather 这一层参数
+
+假设现在要算第 k 层。
+但每张 GPU 手里只有这层参数的一小块。
+那怎么办？
+
+就用 all-gather，把各张 GPU 手里的 shard 临时拼起来，让每张 GPU 都拿到“第 k 层的完整参数”。CS336 明确把 forward 的第一步写成 “Allgather that layer’s parameter shards so each GPU can run the layer.”
+
+大白话：
+
+大家各自手里只拿着教材的一部分，
+但现在全班要一起上第 k 章。
+那就先把第 k 章临时复印齐，发给所有人。
+
+👉 第 2 步：做这一层前向
+
+有了完整参数之后，每张 GPU 还是和数据并行一样，在自己的本地 mini-batch 上算前向。Meta 也强调，FSDP 虽然把参数分片了，但每个 microbatch 的计算仍然是本地进行的。
+
+大白话：
+
+教材虽然是临时拼齐的，
+但每个人还是各改各的卷子。
+不是大家抢同一份数据去算。
+
+👉 第 3 步：立刻释放这层完整参数
+
+这一步超关键。
+如果你 all-gather 之后一直不释放，那显存马上又膨胀回去了。
+所以 ZeRO-3 会在这层 forward 用完后，尽快 free 掉这一层的 full parameters。CS336 就是这么写的。
+
+大白话：
+
+餐桌用完不搬走，那小房子还是会被占满。
+所以一定要：
+
+用完就清。
+
+##### ZeRO-3 的 backward 过程
+
+CS336 对 backward 的逐层模式写成：
+
+如果需要，再次 all-gather 参数
+
+计算 gradients
+
+用 reduce-scatter 把 gradients 分发给对应 owner
+
+owner 更新自己那份 shard
+
+释放 full parameters 和临时 gradients
+
+这个地方很多人第一次看会懵，我帮你拆开。
+
+👉 第 1 步：为什么 backward 还要再 all-gather 一次参数
+
+很多人会问：
+
+“forward 不是刚 gather 过吗？为什么 backward 还要再来一次？”
+
+因为前向结束后，为了省显存，完整参数已经被释放掉了。
+而反向计算某一层梯度时，通常又需要这层参数参与计算，所以要再临时 gather 一次。CS336 的 backward 第一句就是 “Allgather parameters again if needed.”
+
+大白话：
+
+前面那份“临时借来的教材”已经还回去了。
+现在反向要批改第 k 层相关内容，又得再借一次。
+
+这听上去像“折腾”，但换来的是显存大幅下降。
+
+👉 第 2 步：计算这一层梯度
+
+这一步和普通训练本质一样：
+拿着本地数据、当前层完整参数、上游传回来的梯度信号，算出这一层的 parameter gradients。CS336 直接写的是 “Compute gradients.”
+
+大白话：
+
+这一步没什么魔法，
+就是正常反向传播该怎么算还怎么算。
+
+👉 第 3 步：reduce-scatter 梯度
+
+这一步是 ZeRO-3 的关键之一。
+
+因为虽然每张 GPU 都参与算了这一层的梯度，但我们不想让每张 GPU 都长期保存完整梯度。
+所以会做 reduce-scatter：
+
+先把不同 GPU 上对应位置的梯度做 reduce（通常是求和/平均）
+
+再把结果按 shard 切开
+
+每张 GPU 只留下自己负责那一片梯度
+
+CS336 原文是 “Reducescatter gradients so each owner keeps only its shard.” 同一节前面也强调了一个很重要的恒等式：allreduce = reducescatter + allgather，这正是 ZeRO 和 FSDP 的骨架。
+
+大白话：
+
+以前 DDP 是：
+
+把全班总账算完
+
+然后每个人都拿一本完整总账
+
+ZeRO-3 则是：
+
+先把总账算完
+
+但甲只拿工资页，乙只拿报销页，丙只拿税务页
+
+这样每个人手里都不会堆一整本账本。
+
+👉 第 4 步：owner 更新自己负责的 shard
+
+因为优化器状态也是分片的，所以哪张 GPU 持有这部分 optimizer state，它就负责更新对应参数 shard。CS336 的描述是 “Owners update their shards.” Meta 也说明 FSDP 将参数分片到不同 GPU 上，以减少内存并完成本地计算与更新。
+
+大白话：
+
+谁保管哪几页账，
+就谁负责更新哪几页。
+
+不是每个人都更新整本书。
+这是 ZeRO-3 节省显存的核心之一。
+
+👉 第 5 步：释放完整参数和临时梯度
+
+更新完之后，那些“临时为了这一层计算而拼出来的完整参数”和“临时中间梯度”都要释放。CS336 原文就是 “Free full parameters and temporary gradients.”
+
+大白话：
+
+一层算完，现场清空。
+否则下一层一来，显存又爆了。6
 
 为什么听起来很慢，实际上还行
 
@@ -445,9 +567,7 @@ FSDP 的优点很大：
 
 它不自动解决所有 activation memory 问题
 
-大白话：
-
-FSDP 是显存省钱高手，但通信账单会更高。
+大白话：FSDP 是显存省钱高手，但通信账单会更高。
 
 # 十二、这一讲里一个特别重要的思想：Batch size 也是“资源”
 
