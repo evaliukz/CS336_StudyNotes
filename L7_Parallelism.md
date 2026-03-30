@@ -402,6 +402,8 @@ FSDP 本质上就是 ZeRO Stage 3。
 连参数本身也分片。
 也就是说，默认情况下，没有哪张 GPU 永久保存完整模型。
 
+<img width="1081" height="602" alt="image" src="https://github.com/user-attachments/assets/bfbfc772-b3d7-44ae-b63f-ca4ac6638cba" />
+
 那前向怎么算
 
 要用到某一层时，先 all-gather 把这一层参数临时凑齐；
