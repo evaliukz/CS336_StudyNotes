@@ -690,6 +690,9 @@ pipeline parallel 在工程实现上会非常复杂。
 
 ### 6）更高级：zero-bubble / dual-pipe
 
+<img width="1120" height="629" alt="image" src="https://github.com/user-attachments/assets/5004aedc-39c0-4293-ad3b-f378ffb6ee0d" />
+
+
 课程里还提到一种很聪明的做法：
 把 backward 里“必须立刻往前传的部分”和“算参数梯度但不急着传的部分”拆开。
 然后把后者尽量塞进原本 idle 的 bubble 里。
