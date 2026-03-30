@@ -569,21 +569,14 @@ FSDP 的优点很大：
 
 大白话：FSDP 是显存省钱高手，但通信账单会更高。
 
-# 十二、这一讲里一个特别重要的思想：Batch size 也是“资源”
 
-这句话是第 7 章很值钱的地方。
+#### 这一讲里一个特别重要的思想：Batch size 也是“资源”
 
-课程里明确说：
+<img width="1027" height="614" alt="image" src="https://github.com/user-attachments/assets/6a71336b-8ff2-4e5f-ab23-6eaa7d28b21a" />
 
 数据并行不是无限扩展的，因为你最多只能把 batch 切到每张 GPU 至少有一个样本。
 再往下就没法切了。
 而且 batch size 太大也会有收益递减，和 critical batch size 有关。
-
-大白话：
-
-你有一锅饭。
-4 个人吃可以分 4 碗。
-如果来 100 个人，就没法“每人分 0.04 碗”还指望大家都吃得有效率。
 
 所以 batch size 不是想多大就多大。
 它像预算一样，得分配给不同并行方式使用。
