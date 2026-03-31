@@ -876,6 +876,8 @@ ZeRO-3 只做一件事：分 parameter / gradient / optimizer state
 
 ### 3）sequence parallel 的核心办法
 
+<img width="1087" height="543" alt="image" src="https://github.com/user-attachments/assets/b565451c-0186-473d-977f-f8aa8c1ec0ef" />
+
 既然 layer norm、dropout 这类操作在不同 token / sequence position 之间常常互不依赖，
 那就沿着序列维度把它们切开。
 比如 1024 长度的序列，分成几段，每张 GPU 处理其中一段。
@@ -922,6 +924,9 @@ attention 最贵那块靠 FlashAttention / 重计算
 回顾：什么是flash attention？Flash Attention improves attention efficiency by reducing memory IO. 不存整个超级大attention matrix。 It 分块计算 computes attention in a tiled and （融合步骤把QKᵀ，softmax，×V合在一起一次做完）
  fused manner, avoiding materializing the full attention matrix and keeping computation within fast GPU memory.
 
+ <img width="1066" height="578" alt="image" src="https://github.com/user-attachments/assets/c68f7810-1adb-4565-a11c-2c770900ee6e" />
+
+
 # 这一讲最后顺带提到的两种并行
 
 课程后面还顺带提了两类，没深讲，但你要知道名字：
@@ -947,6 +952,9 @@ expert parallel：把“不同专家老师”分到不同办公室
 
 课程最后给了一个非常实用的 rule of thumb。
 我把它翻译成大白话给你。
+
+<img width="1144" height="424" alt="image" src="https://github.com/user-attachments/assets/cdfec16e-870d-4dbd-9bb5-c7889fe693b0" />
+
 
 ### 第一步：先让模型能放得下
 
@@ -975,6 +983,9 @@ activation 太大再上 sequence parallel / recomputation
 
 先解决“能不能装下”，再解决“能不能更快”。
 别反过来。
+
+<img width="1092" height="615" alt="image" src="https://github.com/user-attachments/assets/705a32d7-13e2-40c9-b252-f02e50a9a0be" />
+
 
 # 十九、你可以把这章记成一句超级口语化总结
 
