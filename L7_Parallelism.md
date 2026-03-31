@@ -786,11 +786,11 @@ tensor parallel 在单机内到 8 张卡常常比较合适；
 课程说：还没。
 activation memory 还是会继续长。
 
-#### 定义
+### 定义
 👉 activation激活 = 神经网络每一层“算出来的中间结果”
 👉 除了参数（W）之外，中间所有“算出来的 tensor”，都是 activation
 
-#### 为什么 activation 是显存大户（非常关键）？
+### 为什么 activation 是显存大户（非常关键）？
 
 ZeRO-3解决不了 activation
 
@@ -809,6 +809,11 @@ hidden size = 4096
 32 × 2048 × 4096 ≈ 超大
 
 而且：每一层都有！
+
+<img width="1108" height="600" alt="image" src="https://github.com/user-attachments/assets/f020b661-7544-4b85-a757-a1740bbccdbe" />
+
+<img width="1105" height="620" alt="image" src="https://github.com/user-attachments/assets/6e3b6a2a-2a01-4e97-ae06-020683144b10" />
+
 
 👉 原因 2：不能马上丢
 
