@@ -708,6 +708,9 @@ pipeline parallel 在工程实现上会非常复杂。
 
 这是另一条非常重要的路，而且在大模型里特别常见。
 
+<img width="1035" height="580" alt="image" src="https://github.com/user-attachments/assets/267df1b5-b84c-4c7e-8b03-1cc2ca96856e" />
+
+
 ### 1）核心思想
 
 大模型里很多计算都是矩阵乘法。
@@ -774,9 +777,7 @@ tensor parallel 在单机内到 8 张卡常常比较合适；
 机内做 tensor parallel，跨机再叠别的并行。
 
 
-# 第三大类并行：Activation Parallel（激活并行）- Sequence 并行
-
-# 十六、Sequence Parallel / Activation Sharding（序列并行 / 激活切分）
+# 第三大类并行：Activation Parallel（激活并行）- Sequence Parallel / Activation Sharding（序列并行 / 激活切分）
 
 这一段很关键，因为很多人前面学完会以为：
 
@@ -784,6 +785,61 @@ tensor parallel 在单机内到 8 张卡常常比较合适；
 
 课程说：还没。
 activation memory 还是会继续长。
+
+#### 定义
+👉 activation激活 = 神经网络每一层“算出来的中间结果”
+👉 除了参数（W）之外，中间所有“算出来的 tensor”，都是 activation
+
+#### 为什么 activation 是显存大户（非常关键）？
+
+ZeRO-3解决不了 activation
+
+👉 原因 1：activation 很多
+
+假设：
+
+batch size = 32
+
+sequence length = 2048
+
+hidden size = 4096
+
+那么一个 activation 大小：
+
+32 × 2048 × 4096 ≈ 超大
+
+而且：每一层都有！
+
+👉 原因 2：不能马上丢
+
+因为： backward 要用，activation = “必须存 + 很大”
+
+为什么 ZeRO-3 不管用（你现在能理解了）
+
+ZeRO-3 只做一件事：分 parameter / gradient / optimizer state
+
+但：activation 是“每个 GPU 自己算出来的”
+
+不能分给别人，因为：backward 必须在本地用这些 activation
+
+👉 所以： ZeRO-3 对 activation 没帮助
+
+#### 解决 activation 的方法：
+
+既然 activation 太大，就要想办法减少它。
+
+👉 方法 1：Activation Checkpointing（非常重要）
+
+不存 activation，反向时重新算
+
+大白话：正常：写草稿纸 → 存下来， checkpoint：不写 → 需要时再重新推一遍，用计算换内存
+
+👉 方法 2：减少 batch / sequence 最直接但影响训练效率
+
+👉 方法 3：Sequence Parallel / Tensor Parallel： 把 activation 分到多个 GPU
+
+为什么 activation 很重要（重点！！）训练的时候，你不能只算 forward，还要 backward，所以：activation 必须被“存下来”！
+
 
 ### 1）为什么 activation 这么烦
 
@@ -850,8 +906,7 @@ activation memory 还是会继续长。
 
 大白话：
 
-activation 节省不是靠一招，
-而是几招一起上：
+activation 节省不是靠一招，而是几招一起上：
 
 大矩阵部分靠 tensor parallel
 
@@ -862,7 +917,7 @@ attention 最贵那块靠 FlashAttention / 重计算
 回顾：什么是flash attention？Flash Attention improves attention efficiency by reducing memory IO. 不存整个超级大attention matrix。 It 分块计算 computes attention in a tiled and （融合步骤把QKᵀ，softmax，×V合在一起一次做完）
  fused manner, avoiding materializing the full attention matrix and keeping computation within fast GPU memory.
 
-# 十七、这一讲最后顺带提到的两种并行
+# 这一讲最后顺带提到的两种并行
 
 课程后面还顺带提了两类，没深讲，但你要知道名字：
 
@@ -883,7 +938,7 @@ context parallel：把“长句子的注意力”也拆着算
 
 expert parallel：把“不同专家老师”分到不同办公室
 
-# 十八、这一章最值钱的实战结论：怎么组合这些并行
+# 这一章最值钱的实战结论：怎么组合这些并行
 
 课程最后给了一个非常实用的 rule of thumb。
 我把它翻译成大白话给你。
