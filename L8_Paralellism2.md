@@ -32,7 +32,7 @@
 
 ##### world size 是设备总数，rank 是某一个设备的编号
 
-为什么先学这些
+### 为什么先学这些
 
 因为多 GPU 训练，表面上看是在“同步梯度”或者“传激活”。
 但底层真正发生的，其实就是几种固定模式的通信：broadcast, scatter, gather, reduce, all-gather, reduce-scatter, all-reduce
@@ -41,8 +41,8 @@
 
 这些就像物流公司的几种固定路线：一个人发给所有人,一堆货拆开分给大家,大家把货交给一个人,大家把结果汇总,大家互相拼完整,先汇总再拆分,先汇总再所有人都拿一份,你后面看到 DDP、TP、PP，本质都只是这些路线的组合。
 
-四、这些 collective operation 用大白话怎么理解
-1）Broadcast
+### 这些 collective operation 用大白话怎么理解
+#### 1）Broadcast
 
 一个 rank 有数据，发给所有 rank。讲义直接列了 broadcast，并配了 PyTorch 教程图。
 
@@ -50,7 +50,7 @@
 
 班长把通知发到每个人手里。
 
-2）Scatter
+#### 2）Scatter
 
 一个完整数据块，被拆成几份，发给不同 rank。讲义把 scatter 和 gather 放在一起讲，还特别提醒：broadcast/scatter 和 gather 互为逆操作。
 
@@ -58,7 +58,7 @@
 
 把一大箱苹果拆成四袋，四个人一人拎一袋。
 
-3）Gather
+#### 3）Gather
 
 每个 rank 各拿一小块，集中到一个地方。
 
@@ -66,7 +66,7 @@
 
 大家把手里的拼图交给一个人，拼成整张图。
 
-4）Reduce
+### 4）Reduce
 
 大家各有一份值，做一个可交换可结合的操作，比如 sum、min、max，最后汇总。讲义专门提醒 reduce 的“reduce”指的是做这种结合操作。
 
@@ -74,7 +74,7 @@
 
 四个人各报一个数字，最后把它们加起来。
 
-5）All-gather
+### 5）All-gather
 
 每个 rank 各有一小块，最后 所有 rank 都得到拼好的完整结果。讲义列了 all-gather 的图，也在后面的 tensor parallel 里真的用到它。
 
@@ -82,7 +82,7 @@
 
 每个人手里只有自己那块拼图，最后每个人都拿到整张图。
 
-6）Reduce-scatter
+### 6）Reduce-scatter
 
 先 reduce，再 scatter。也就是大家先汇总，但不是每个人拿完整汇总结果，而是每个人只拿其中一块。讲义既列了 reduce-scatter 图，也在代码里做了示例。
 
@@ -90,7 +90,7 @@
 
 大家一起做总账，但最后甲只拿工资表那页，乙只拿报销表那页。
 
-7）All-reduce
+### 7）All-reduce
 
 先 reduce，再让所有人都拿到结果。讲义非常明确地写了一句：
 
@@ -103,7 +103,7 @@ all-reduce = reduce-scatter + all-gather。
 
 这句话很重要，因为后面你理解 FSDP、ZeRO、梯度同步时，脑子里基本都离不开它。
 
-五、第二部分：硬件到底长什么样，为什么它会决定并行策略
+# 第二部分：硬件到底长什么样，为什么它会决定并行策略
 
 讲义接着讲硬件。它先拿家用环境做对比：同一台机器里的 GPU 可能走 PCIe，总线带宽比跨机器网络高很多；现代数据中心则是 GPU 之间用 NVLink 直接连，跨更多 GPU / 节点还有更复杂互连。讲义还给出一个对比：每块 H100 的 NVLink 总带宽大约 900 GB/s，而 HBM 内存带宽更高，大约 3.9 TB/s。
 
