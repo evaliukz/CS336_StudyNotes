@@ -12,6 +12,8 @@
 
 多 GPU 训练的核心，不是“多几张卡一起算”这么简单，而是“怎么算的同时，尽量少传数据，或者把必须传的数据传得更聪明”。 讲义把多层级硬件列成了一个 hierarchy：单 GPU 里有 L1 / shared memory、HBM；多 GPU 里有 NVLink；跨节点还有更慢的互连。整个并行策略就是在这个层级上做权衡。
 
+<img width="503" height="528" alt="image" src="https://github.com/user-attachments/assets/cd28dd69-d907-422a-8883-8e1bd4d31682" />
+
 大白话：
 
 你可以把它想成搬家：
@@ -50,6 +52,8 @@
 
 班长把通知发到每个人手里。
 
+<img width="407" height="248" alt="image" src="https://github.com/user-attachments/assets/71fe4d43-b445-4708-8d38-614351a5c4ea" />
+
 #### 2）Scatter
 
 一个完整数据块，被拆成几份，发给不同 rank。讲义把 scatter 和 gather 放在一起讲，还特别提醒：broadcast/scatter 和 gather 互为逆操作。
@@ -57,6 +61,8 @@
 大白话：
 
 把一大箱苹果拆成四袋，四个人一人拎一袋。
+<img width="422" height="237" alt="image" src="https://github.com/user-attachments/assets/2342f5a3-508a-4c58-8707-29088ce43100" />
+
 
 #### 3）Gather
 
@@ -65,6 +71,8 @@
 大白话：
 
 大家把手里的拼图交给一个人，拼成整张图。
+<img width="421" height="238" alt="image" src="https://github.com/user-attachments/assets/a409861a-6348-4495-9653-da24750f9927" />
+
 
 #### 4）Reduce
 
@@ -74,6 +82,8 @@
 
 四个人各报一个数字，最后把它们加起来。
 
+<img width="405" height="234" alt="image" src="https://github.com/user-attachments/assets/e75eaf6d-6129-46e3-8147-3ae500d847ae" />
+
 #### 5）All-gather
 
 每个 rank 各有一小块，最后 所有 rank 都得到拼好的完整结果。讲义列了 all-gather 的图，也在后面的 tensor parallel 里真的用到它。
@@ -82,6 +92,8 @@
 
 每个人手里只有自己那块拼图，最后每个人都拿到整张图。
 
+<img width="418" height="242" alt="image" src="https://github.com/user-attachments/assets/e2be9a7f-fadf-4be6-b00f-8061b541dc14" />
+
 #### 6）Reduce-scatter
 
 先 reduce，再 scatter。也就是大家先汇总，但不是每个人拿完整汇总结果，而是每个人只拿其中一块。讲义既列了 reduce-scatter 图，也在代码里做了示例。
@@ -89,6 +101,9 @@
 大白话：
 
 大家一起做总账，但最后甲只拿工资表那页，乙只拿报销表那页。
+
+ <img width="435" height="187" alt="image" src="https://github.com/user-attachments/assets/be2ebf10-19b5-414b-8b25-d42e64d047aa" />
+
 
 ### 7）All-reduce
 
@@ -102,6 +117,15 @@ all-reduce = reduce-scatter + all-gather。
 先把总分算出来，然后每个人都拿一份总分。
 
 这句话很重要，因为后面你理解 FSDP、ZeRO、梯度同步时，脑子里基本都离不开它。
+<img width="425" height="246" alt="image" src="https://github.com/user-attachments/assets/ec43f579-25bd-4798-a17a-bee4844e3fc1" />
+
+Way to remember the terminology:
+
+Reduce: performs some associative/commutative operation (sum, min, max)
+    
+Broadcast/scatter is inverse of gather
+    
+All: means destination is all devices
 
 # 第二部分：硬件到底长什么样，为什么它会决定并行策略
 
