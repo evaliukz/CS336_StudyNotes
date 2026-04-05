@@ -66,7 +66,7 @@
 
 大家把手里的拼图交给一个人，拼成整张图。
 
-### 4）Reduce
+#### 4）Reduce
 
 大家各有一份值，做一个可交换可结合的操作，比如 sum、min、max，最后汇总。讲义专门提醒 reduce 的“reduce”指的是做这种结合操作。
 
@@ -74,7 +74,7 @@
 
 四个人各报一个数字，最后把它们加起来。
 
-### 5）All-gather
+#### 5）All-gather
 
 每个 rank 各有一小块，最后 所有 rank 都得到拼好的完整结果。讲义列了 all-gather 的图，也在后面的 tensor parallel 里真的用到它。
 
@@ -82,7 +82,7 @@
 
 每个人手里只有自己那块拼图，最后每个人都拿到整张图。
 
-### 6）Reduce-scatter
+#### 6）Reduce-scatter
 
 先 reduce，再 scatter。也就是大家先汇总，但不是每个人拿完整汇总结果，而是每个人只拿其中一块。讲义既列了 reduce-scatter 图，也在代码里做了示例。
 
